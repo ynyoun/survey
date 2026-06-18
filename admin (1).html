@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 팀 평가 설문</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',Arial,sans-serif;background:#f5f5f5;min-height:100vh;}
+.wrap{max-width:680px;margin:0 auto;padding:2rem 1rem;}
+.screen{display:none;}.screen.active{display:block;}
+.hdr{background:#fff;border-bottom:1px solid #e8e8e8;padding:1rem 0;margin-bottom:2rem;text-align:center;}
+.hdr h1{font-size:18px;font-weight:600;color:#222;}
+.hdr p{font-size:13px;color:#888;margin-top:4px;}
+.card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:1.5rem;margin-bottom:1rem;}
+label{font-size:13px;font-weight:500;color:#555;display:block;margin-bottom:6px;}
+input[type=text],input[type=password],select,textarea{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#222;background:#fff;outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:#6366f1;}
+textarea{resize:vertical;min-height:80px;line-height:1.6;}
+.fg{margin-bottom:1rem;}
+.btn{padding:10px 18px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .15s;}
+.btn-p{background:#6366f1;color:#fff;}.btn-p:hover{background:#4f46e5;}
+.btn-b{width:100%;}
+.btn-s{background:#f5f5f5;color:#555;border:1px solid #ddd;}.btn-s:hover{background:#eee;}
+.btn-d{background:#fff;color:#dc2626;border:1px solid #fca5a5;}.btn-d:hover{background:#fef2f2;}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.nav{display:flex;gap:8px;margin-top:1.5rem;}
+.nav .btn-s{flex:1;}.nav .btn-p{flex:2;}
+.prog-bg{height:6px;background:#e8e8e8;border-radius:3px;}
+.prog-bar{height:6px;background:#6366f1;border-radius:3px;transition:width .3s;}
+.prog-info{display:flex;justify-content:space-between;font-size:13px;color:#888;margin-bottom:8px;}
+.badge{display:inline-block;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500;margin-bottom:10px;}
+.b-pu{background:#EEF2FF;color:#4338CA;}.b-te{background:#ECFDF5;color:#065F46;}.b-am{background:#FFFBEB;color:#92400E;}
+.qcard{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:1.5rem;margin-bottom:1rem;}
+.qnum{font-size:12px;color:#6366f1;font-weight:600;margin-bottom:6px;}
+.qtxt{font-size:15px;font-weight:500;color:#222;line-height:1.6;}
+.qarea{margin-top:12px;}
+.yn-row{display:flex;gap:8px;margin-bottom:12px;}
+.yn-btn{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:14px;cursor:pointer;font-weight:500;}
+.yn-btn.ay{background:#ECFDF5;border-color:#059669;color:#065F46;}
+.yn-btn.an{background:#FEF2F2;border-color:#DC2626;color:#991B1B;}
+.chk-group{display:flex;flex-direction:column;gap:8px;}
+.chk-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e8e8e8;border-radius:8px;cursor:pointer;}
+.chk-item:hover{background:#f9f9f9;}
+.chk-item.sel{background:#EEF2FF;border-color:#6366f1;}
+.chk-item input[type=checkbox]{width:16px;height:16px;accent-color:#6366f1;cursor:pointer;flex-shrink:0;}
+.chk-item span{font-size:14px;color:#333;}
+.r-row{display:flex;gap:6px;margin-bottom:8px;}
+.r-btn{flex:1;padding:10px 0;border:1px solid #ddd;border-radius:8px;background:#fff;font-size:14px;font-weight:500;cursor:pointer;text-align:center;}
+.r-btn.sel{background:#EEF2FF;border-color:#6366f1;color:#4338CA;}
+.r-lbl{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:8px;}
+.r-desc{background:#f9f9f9;border-radius:8px;padding:10px 12px;font-size:13px;color:#555;line-height:1.6;display:none;}
+.r-desc.on{display:block;}
+.reason{margin-top:10px;display:none;}
+.reason.on{display:block;}
+.reason-lbl{font-size:13px;color:#dc2626;font-weight:500;margin-bottom:6px;}
+.tgt-list{display:flex;flex-direction:column;gap:8px;}
+.tgt-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border:1px solid #e8e8e8;border-radius:10px;cursor:pointer;background:#fff;}
+.tgt-item:hover{border-color:#6366f1;background:#fafafa;}
+.tgt-item.done{border-color:#059669;background:#ECFDF5;}
+.tgt-info{display:flex;align-items:center;gap:10px;}
+.avatar{width:36px;height:36px;border-radius:50%;background:#EEF2FF;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#4338CA;flex-shrink:0;}
+.tgt-name{font-size:15px;font-weight:500;color:#222;}
+.tgt-grade{font-size:12px;color:#888;}
+.tgt-status{font-size:12px;white-space:nowrap;}
+.tgt-status.done{color:#059669;font-weight:500;}
+.tgt-status.pend{color:#aaa;}
+.sum-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:1.5rem;}
+.sum-box{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:1rem;text-align:center;}
+.sum-num{font-size:24px;font-weight:600;color:#6366f1;}
+.sum-lbl{font-size:12px;color:#888;margin-top:4px;}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:1rem;}
+.a-err{background:#FEF2F2;color:#991B1B;border:1px solid #fca5a5;}
+.a-info{background:#EEF2FF;color:#3730A3;border:1px solid #c7d2fe;}
+/* admin */
+.tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:1px solid #e8e8e8;}
+.tab-btn{padding:10px 18px;font-size:14px;font-weight:500;cursor:pointer;border:none;background:none;color:#888;border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tab-btn.on{color:#6366f1;border-bottom-color:#6366f1;}
+.tab-c{display:none;}.tab-c.on{display:block;}
+.exp-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#059669;color:#fff;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;}
+.exp-btn:hover{background:#047857;}
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:#f5f5f5;padding:8px 12px;text-align:left;font-weight:600;color:#555;border-bottom:1px solid #e8e8e8;white-space:nowrap;}
+td{padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#333;vertical-align:middle;}
+tr:hover td{background:#fafafa;}
+.emp-table input{padding:5px 8px;font-size:13px;border:1px solid #e0e0e0;border-radius:6px;width:100%;}
+.emp-table input:focus{border-color:#6366f1;outline:none;}
+.emp-table select{padding:5px 8px;font-size:13px;border:1px solid #e0e0e0;border-radius:6px;}
+.save-ok{font-size:12px;color:#059669;margin-left:8px;display:none;}
+.on-q{background:#EEF2FF;color:#4338CA;border-color:#6366f1;}
+</style>
+</head>
+<body>
+<div id="phdr" class="hdr" style="display:none;"><h1>2026 상반기 팀 평가</h1><p id="puinfo"></p></div>
+<div class="wrap">
+
+<!-- 로그인 -->
+<div class="screen" id="s-login">
+  <div style="max-width:400px;margin:3rem auto;">
+    <div class="card" style="padding:2rem;">
+      <div style="width:56px;height:56px;background:#EEF2FF;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:24px;">📋</div>
+      <div style="text-align:center;font-size:20px;font-weight:600;color:#222;margin-bottom:6px;">2026 상반기 팀 평가</div>
+      <div style="text-align:center;font-size:14px;color:#888;margin-bottom:1.5rem;">개별 안내받은 정보로 로그인하세요</div>
+      <div id="lerr" class="alert a-err" style="display:none;"></div>
+      <div class="fg"><label>평가자 ID</label><input type="text" id="inp-id" placeholder="예: 101" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="fg"><label>이름</label><input type="text" id="inp-name" placeholder="예: 홍길동" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="fg"><label>비밀번호</label><input type="password" id="inp-pw" placeholder="개별 안내된 6자리 비밀번호" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="btn btn-p btn-b" onclick="doLogin()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 평가 목록 -->
+<div class="screen" id="s-select">
+  <div class="sum-grid">
+    <div class="sum-box"><div class="sum-num" id="s-total">0</div><div class="sum-lbl">전체 평가</div></div>
+    <div class="sum-box"><div class="sum-num" id="sum-done" style="color:#059669;">0</div><div class="sum-lbl">완료</div></div>
+    <div class="sum-box"><div class="sum-num" id="s-rem" style="color:#f59e0b;">0</div><div class="sum-lbl">남은 평가</div></div>
+  </div>
+  <div id="eval-list"></div>
+</div>
+
+<!-- 설문 -->
+<div class="screen" id="s-survey">
+  <div style="margin-bottom:1.5rem;">
+    <div class="prog-info"><span id="sv-badge"></span><span id="sv-step"></span></div>
+    <div class="prog-bg"><div class="prog-bar" id="sv-prog"></div></div>
+  </div>
+  <div id="sv-target"></div>
+  <div id="sv-q"></div>
+  <div class="nav">
+    <button class="btn btn-s" onclick="svPrev()">← 이전</button>
+    <button class="btn btn-p" id="sv-next" onclick="svNext()">다음 →</button>
+  </div>
+</div>
+
+<!-- 완료 안내 -->
+<div class="screen" id="s-done">
+  <div style="max-width:400px;margin:4rem auto;text-align:center;">
+    <div style="width:72px;height:72px;background:#ECFDF5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:36px;">✓</div>
+    <div style="font-size:20px;font-weight:600;color:#222;margin-bottom:8px;">이미 완료된 평가입니다</div>
+    <div style="font-size:14px;color:#888;line-height:1.8;margin-bottom:2rem;">이 평가는 이미 제출 완료되었습니다.</div>
+    <button class="btn btn-s" onclick="goSelect()">← 목록으로 돌아가기</button>
+  </div>
+</div>
+
+<!-- 관리자 -->
+<div class="screen active" id="s-admin">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+    <div><div style="font-size:18px;font-weight:600;color:#222;">관리자 페이지</div><div style="font-size:13px;color:#888;margin-top:2px;">2026 상반기 팀 평가</div></div>
+    <button class="btn btn-s btn-sm" onclick="adminOut()">로그아웃</button>
+  </div>
+  <div id="admin-login">
+    <div style="max-width:400px;margin:0 auto;">
+      <div class="card" style="padding:1.5rem;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:1rem;">🔐 관리자 로그인</div>
+        <div id="adm-err" class="alert a-err" style="display:none;">비밀번호가 올바르지 않습니다.</div>
+        <div class="fg"><label>관리자 비밀번호</label><input type="password" id="adm-pw" placeholder="관리자 비밀번호" onkeydown="if(event.key==='Enter')admLogin()"/></div>
+        <button class="btn btn-p btn-b" onclick="admLogin()">확인</button>
+      </div>
+    </div>
+  </div>
+  <div id="admin-main" style="display:none;">
+    <div class="tabs">
+      <button class="tab-btn on" onclick="switchTab('t-res')">📊 응답 결과</button>
+      <button class="tab-btn" onclick="switchTab('t-emp')">👥 직원 정보 수정</button>
+      <button class="tab-btn" onclick="switchTab('t-q')">📝 문항 수정</button>
+    </div>
+    <div class="tab-c on" id="t-res">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:1rem;">
+        <div class="sum-box"><div class="sum-num" id="a-total">0</div><div class="sum-lbl">전체 평가자</div></div>
+        <div class="sum-box"><div class="sum-num" id="a-done" style="color:#059669;">0</div><div class="sum-lbl">완료</div></div>
+        <div class="sum-box"><div class="sum-num" id="a-part" style="color:#f59e0b;">0</div><div class="sum-lbl">일부 완료</div></div>
+        <div class="sum-box"><div class="sum-num" id="a-none" style="color:#dc2626;">0</div><div class="sum-lbl">미응답</div></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;">
+        <button class="exp-btn" onclick="doExport()">📥 엑셀(CSV) 다운로드</button>
+        <button class="btn btn-d btn-sm" onclick="doClear()">🗑 응답 전체 초기화</button>
+      </div>
+      <div class="card"><div id="adm-tbl"></div></div>
+    </div>
+    <div class="tab-c" id="t-emp">
+      <div class="alert a-info" style="margin-bottom:1rem;">이름, 소속팀, 직급, 비밀번호를 수정 후 반드시 <strong>저장</strong>을 눌러주세요.</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;">
+        <button class="btn btn-p btn-sm" onclick="saveEmps()">💾 저장하기</button>
+        <button class="btn btn-s btn-sm" onclick="resetEmps()">↩ 원본으로 초기화</button>
+        <span id="save-ok" class="save-ok">✓ 저장되었습니다</span>
+      </div>
+      <div class="card" style="padding:0.75rem;"><div class="tw"><table class="emp-table"><thead><tr><th>ID</th><th>이름</th><th>소속 팀</th><th>직급</th><th>비밀번호</th></tr></thead><tbody id="emp-body"></tbody></table></div></div>
+    </div>
+    <div class="tab-c" id="t-q">
+      <div class="alert a-info" style="margin-bottom:1rem;">Type별 문항을 수정할 수 있습니다. 수정 후 반드시 <strong>저장</strong>을 눌러주세요.</div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;align-items:center;">
+        <button class="btn btn-p btn-sm" onclick="saveQs()">💾 저장하기</button>
+        <button class="btn btn-s btn-sm" onclick="resetQs()">↩ 원본으로 초기화</button>
+        <span id="q-save-ok" class="save-ok">✓ 저장되었습니다</span>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;">
+        <button class="btn btn-s btn-sm" onclick="showQType(3)" id="qt3">Type 3 (팀장→팀원)</button>
+        <button class="btn btn-s btn-sm" onclick="showQType(4)" id="qt4">Type 4 (팀원→팀장)</button>
+        <button class="btn btn-s btn-sm" onclick="showQType(5)" id="qt5">Type 5 (동료평가)</button>
+      </div>
+      <div id="q-edit-area"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+var ADMIN_PW = 'Admin2026HR';
+
+var DEFAULT_EMPS = [
+  {id:101,team:'People&Culture팀',grade:'팀장',name:'윤이나',pw:'XAJI0Y'},
+  {id:102,team:'People&Culture팀',grade:'선임',name:'홍세영',pw:'6DPBHS'},
+  {id:103,team:'People&Culture팀',grade:'선임',name:'김단아',pw:'AHXTHV'},
+  {id:104,team:'Assessment 1팀',grade:'팀장',name:'권동균',pw:'3A3ZMF'},
+  {id:105,team:'Assessment 1팀',grade:'선임',name:'윤지현',pw:'8MDD4V'},
+  {id:106,team:'Assessment 1팀',grade:'선임',name:'안정훈',pw:'30T9NT'},
+  {id:107,team:'Assessment 1팀',grade:'선임',name:'안나연',pw:'3W5UZB'},
+  {id:108,team:'Assessment 1팀',grade:'위원',name:'김윤경',pw:'IKCIDK'},
+  {id:109,team:'Assessment 1팀',grade:'위원',name:'박서진',pw:'WNNHJ7'},
+  {id:110,team:'Assessment2팀',grade:'팀장',name:'한미희',pw:'XVG0FN'},
+  {id:111,team:'Assessment2팀',grade:'선임',name:'김다희',pw:'9XUY41'},
+  {id:112,team:'Assessment2팀',grade:'위원',name:'김선경',pw:'IBLJH7'},
+  {id:113,team:'Assessment2팀',grade:'위원',name:'홍경희',pw:'5LXO6Q'},
+  {id:114,team:'Assessment2팀',grade:'위원',name:'이솔빈',pw:'JIUJV6'},
+  {id:115,team:'Assessment2팀',grade:'위원',name:'이예린',pw:'OH9SDB'},
+  {id:116,team:'Assessment2팀',grade:'위원',name:'양우연',pw:'DW2PCN'},
+  {id:117,team:'Assessment2팀',grade:'위원',name:'김미성',pw:'9T84AZ'},
+  {id:118,team:'Assessment2팀',grade:'위원',name:'김민경',pw:'YTJXEP'},
+  {id:119,team:'HR운영팀',grade:'팀장',name:'김현해',pw:'Q85JSG'},
+  {id:120,team:'HR운영팀',grade:'선임',name:'홍찬미',pw:'65KXVF'},
+  {id:121,team:'HR운영팀',grade:'선임',name:'김다은',pw:'1T2TAL'},
+  {id:122,team:'HR운영팀',grade:'선임',name:'박세령',pw:'A753LC'},
+  {id:123,team:'HR운영팀',grade:'선임',name:'김소윤',pw:'58DRC1'},
+  {id:124,team:'HR운영팀',grade:'위원',name:'황희은',pw:'1ERTJ5'},
+  {id:125,team:'HR운영팀',grade:'위원',name:'이다빈',pw:'PHT0HL'},
+  {id:126,team:'HR운영팀',grade:'위원',name:'강민구',pw:'9XPSEI'},
+  {id:127,team:'HR Tech팀',grade:'팀장',name:'김대희',pw:'MVIHCW'},
+  {id:128,team:'HR Tech팀',grade:'수석',name:'신효은',pw:'I64CIY'},
+  {id:129,team:'HR Tech팀',grade:'선임',name:'김현민',pw:'HE7UR2'},
+  {id:130,team:'HR Tech팀',grade:'선임',name:'전승환',pw:'3GDPPQ'},
+  {id:131,team:'HR Tech팀',grade:'위원',name:'이승현',pw:'0Y9DOM'}
+];
+
+var GRADES = ['팀장','수석','선임','위원'];
+var TEAMS = ['People&Culture팀','Assessment 1팀','Assessment2팀','HR운영팀','HR Tech팀'];
+var VO = ['①없음','②차별','③모욕','④폭언','⑤성희롱','⑥기타(작성)'];
+
+var Q3 = [
+  {type:'ync', text:'구성원에게 차별, 모욕, 폭언, 성희롱 등의 신체적/정신적 고통을 주는 행위를 한다.\n※ 해당되는 사례에 모두 체크해주시기 바랍니다.'},
+  {type:'rate', text:'구성원들이 갈등 없이 잘 융화하고 팀 분위기를 긍정적으로 만들고 적극적으로 소통하고 협업한다.', d:{1:'빈번한 갈등, 팀 분위기 저해, 협업에 소극적, 소통 부재',3:'협업 필요 시 참여, 업무 수동 원활, 팀 분위기에 융화',5:'긍정적 팀 분위기 주도, 적극적 소통, 협업 시 주도적 역할 수행, 팀/조직 성과에 기여'}},
+  {type:'rate', text:'주어진 업무의 중요도를 고려하여 우선순위를 선정하고 업무를 신속하게 처리한다.', d:{1:'업무기민 수준 미달, 우선순위/중요도 고려 미흡, 불필요/기대된 시간 투자',3:'업무기민 준수, 우선순위/중요도 고려한 계획 수립, 적절한 시간 관리',5:'업무기민 보다 빠르게 완수, 우선순위/중요도/난이수 고려'}},
+  {type:'rate', text:'업무 수행 시 합리적인 의사결정을 진행하고 해당 난이에 기대되는 Output을 제시한다.', d:{1:'결과기대 수준 미달',3:'요구하는 역할 대부분 수행, 결과물 결손 수준',5:'결과물 기대 수준 상회(ex. 본인 직급 대비 1개 직급 이상 수준 달성)'}},
+  {type:'rate', text:'수행 업무에 대한 전문성과 업무 수행 절차에 대한 이해를 바탕으로 업무를 진행한다.', d:{1:'업무 관련 기본지식 부족, 업무 수행 방법/절차에 대한 이해 부족',3:'업무 관련 기본지식 보유, 업무 수행 방법/절차 정확히 이해',5:'업무에 대한 논리적/합리적 접근, 업무 상황에 따라 방법/절차 고도화 및 응용 가능'}}
+];
+var Q4 = [
+  {type:'ync', text:'구성원에게 차별, 모욕, 폭언, 성희롱 등의 신체적/정신적 고통을 주는 행위를 한다.\n※ 해당되는 사례에 모두 체크해주시기 바랍니다.'},
+  {type:'rate', text:'팀원이 편하게 의견을 제시할 수 있는 분위기를 조성하며, 업무와 관련된 구성원의 고충을 듣고 해결하려고 노력한다.', d:{1:'권위적, 무관심, 무조건적인 지시, 의견 무시',3:'편안한 분위기 조성, 팀원 의견에 대한 경청',5:'팀원 의견에 대한 지지/수용, 업무 고충 해결을 위한 노력, 신뢰감 제공'}},
+  {type:'text', text:'상시(팀장 혹은 본부장)의 업무 피드백 스타일을 설명해주세요.'}
+];
+var Q5 = [
+  {type:'ync', text:'구성원에게 차별, 모욕, 폭언, 성희롱 등의 신체적/정신적 고통을 주는 행위를 한다.\n※ 해당되는 사례에 모두 체크해주시기 바랍니다.'},
+  {type:'rate', text:'구성원들이 갈등 없이 잘 융화하고 팀 분위기를 긍정적으로 만들고 적극적으로 소통하고 협업한다.', d:{1:'빈번한 갈등, 팀 분위기 저해, 협업에 소극적, 소통 부재',3:'협업 필요 시 참여, 업무 수동 원활, 팀 분위기에 융화',5:'긍정적 팀 분위기 주도, 적극적 소통, 협업 시 주도적 역할 수행, 팀/조직 성과에 기여'}}
+];
+
+function getEmps(){try{var s=localStorage.getItem('emps');return s?JSON.parse(s):JSON.parse(JSON.stringify(DEFAULT_EMPS));}catch(e){return JSON.parse(JSON.stringify(DEFAULT_EMPS));}}
+function setEmps(d){localStorage.setItem('emps',JSON.stringify(d));}
+function getRes(){try{return JSON.parse(localStorage.getItem('res')||'[]');}catch(e){return[];}}
+function addRes(r){var a=getRes();a.push(r);localStorage.setItem('res',JSON.stringify(a));}
+function getDoneSet(){var r=getRes(),s=new Set();r.forEach(function(x){s.add(x.ei+'_'+x.ti+'_'+x.tp);});return s;}
+
+var CU=null, ETs=[], CEI=-1, CS=0, ANS={};
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  var h=document.getElementById('phdr');
+  h.style.display=(id==='s-login'||id==='s-admin')?'none':'block';
+}
+function goSelect(){show('s-select');renderSelect();}
+
+function doLogin(){
+  var id=parseInt(document.getElementById('inp-id').value.trim());
+  var nm=document.getElementById('inp-name').value.trim();
+  var pw=document.getElementById('inp-pw').value.trim().toUpperCase();
+  var emps=getEmps();
+  var emp=null;
+  for(var i=0;i<emps.length;i++){if(emps[i].id===id&&emps[i].name===nm&&emps[i].pw===pw){emp=emps[i];break;}}
+  var err=document.getElementById('lerr');
+  if(!emp){err.style.display='block';err.textContent='ID, 이름 또는 비밀번호가 올바르지 않습니다.';return;}
+  err.style.display='none';
+  CU=emp;
+  document.getElementById('puinfo').textContent=emp.team+' · '+emp.grade+' '+emp.name;
+  buildTargets();
+  show('s-select');
+  renderSelect();
+}
+
+function buildTargets(){
+  ETs=[];
+  var emps=getEmps();
+  var team=emps.filter(function(e){return e.team===CU.team&&e.id!==CU.id;});
+  var isMgr=CU.grade==='팀장';
+  if(isMgr){
+    team.forEach(function(t){ETs.push({tp:3,tgt:t,done:false});});
+  } else {
+    var mgr=null;
+    for(var i=0;i<emps.length;i++){if(emps[i].team===CU.team&&emps[i].grade==='팀장'){mgr=emps[i];break;}}
+    if(mgr) ETs.push({tp:4,tgt:mgr,done:false});
+    team.filter(function(e){return e.grade!=='팀장';}).forEach(function(t){ETs.push({tp:5,tgt:t,done:false});});
+  }
+  var done=getDoneSet();
+  ETs.forEach(function(e){e.done=done.has(CU.id+'_'+e.tgt.id+'_'+e.tp);});
+}
+
+function renderSelect(){
+  var d=ETs.filter(function(e){return e.done;}).length;
+  document.getElementById('s-total').textContent=ETs.length;
+  document.getElementById('sum-done').textContent=d;
+  document.getElementById('s-rem').textContent=ETs.length-d;
+  var types=[];
+  ETs.forEach(function(e){if(types.indexOf(e.tp)<0)types.push(e.tp);});
+  var TL={3:'Type 3 · 팀장→팀원 평가',4:'Type 4 · 팀원→팀장 평가',5:'Type 5 · 팀원→동료 평가'};
+  var TB={3:'b-pu',4:'b-am',5:'b-te'};
+  var html='';
+  types.forEach(function(tp){
+    var items=ETs.filter(function(e){return e.tp===tp;});
+    html+='<div class="card" style="margin-bottom:1rem;"><span class="badge '+TB[tp]+'">'+TL[tp]+'</span><div class="tgt-list">';
+    items.forEach(function(item){
+      var idx=ETs.indexOf(item);
+      var act=item.done?'showDone()':'startEval('+idx+')';
+      html+='<div class="tgt-item '+(item.done?'done':'')+'" onclick="'+act+'">'
+        +'<div class="tgt-info"><div class="avatar">'+item.tgt.name.slice(-2)+'</div>'
+        +'<div><div class="tgt-name">'+item.tgt.name+'</div><div class="tgt-grade">'+item.tgt.team+' · '+item.tgt.grade+'</div></div></div>'
+        +'<div class="tgt-status '+(item.done?'done':'pend')+'">'+(item.done?'✓ 완료':'미완료 →')+'</div>'
+        +'</div>';
+    });
+    html+='</div></div>';
+  });
+  document.getElementById('eval-list').innerHTML=html;
+}
+
+function getQs(tp){return tp===3?Q3:tp===4?Q4:Q5;}
+
+function startEval(idx){
+  CEI=idx; CS=0; ANS={};
+  var item=ETs[idx];
+  var TL={3:'Type 3 · 팀장→팀원',4:'Type 4 · 팀원→팀장',5:'Type 5 · 동료평가'};
+  document.getElementById('sv-badge').textContent=TL[item.tp];
+  show('s-survey');
+  renderQ();
+}
+
+function showDone(){show('s-done');}
+
+function renderQ(){
+  var item=ETs[CEI], qs=getQs(item.tp), q=qs[CS], tot=qs.length;
+  document.getElementById('sv-step').textContent=(CS+1)+' / '+tot;
+  document.getElementById('sv-prog').style.width=Math.round((CS+1)/tot*100)+'%';
+  document.getElementById('sv-next').textContent=CS===tot-1?'제출 완료':'다음 →';
+  document.getElementById('sv-target').innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;padding:12px 16px;background:#f9f9f9;border-radius:10px;">'
+    +'<div class="avatar">'+item.tgt.name.slice(-2)+'</div>'
+    +'<div><div style="font-size:15px;font-weight:600;color:#222;">'+item.tgt.name+' 평가</div>'
+    +'<div style="font-size:12px;color:#888;">'+item.tgt.team+' · '+item.tgt.grade+'</div></div></div>';
+  var sv=ANS[CS]||{};
+  var html='<div class="qcard"><div class="qnum">문항 '+(CS+1)+'</div><div class="qtxt">'+q.text.replace(/\n/g,'<br>')+'</div>';
+  if(q.type==='ync'){
+    html+='<div class="qarea"><div class="chk-group">';
+    for(var i=0;i<VO.length;i++){
+      var chk=sv.checked&&sv.checked.indexOf(i)>=0;
+      html+='<label class="chk-item '+(chk?'sel':'')+'"><input type="checkbox" data-i="'+i+'" onchange="togChk(this)" '+(chk?'checked':'')+'/><span>'+VO[i]+'</span></label>';
+    }
+    html+='</div>'
+      +'<div id="extra-wrap" style="display:'+(sv.checked&&sv.checked.indexOf(5)>=0?'block':'none')+';margin-top:10px;">'
+      +'<label style="font-size:13px;color:#dc2626;margin-bottom:6px;">기타 내용을 입력해주세요</label>'
+      +'<textarea id="extra-txt" placeholder="기타 내용 입력...">'+(sv.extraText||'')+'</textarea>'
+      +'</div></div>';
+  } else if(q.type==='rate'){
+    var sel=sv.score, nr=sel===4||sel===5;
+    html+='<div class="qarea"><div class="r-row">';
+    for(var n=1;n<=5;n++) html+='<button class="r-btn '+(sel===n?'sel':'')+'" onclick="setRate('+n+')">'+n+'</button>';
+    html+='</div><div class="r-lbl"><span>매우 낮음</span><span>보통</span><span>매우 높음</span></div>';
+    if(sel){var dk=sel<=2?1:sel===3?3:5; html+='<div class="r-desc on">'+q.d[dk]+'</div>';}
+    else html+='<div class="r-desc"></div>';
+    html+='<div class="reason '+(nr?'on':'')+'" id="reason-box">'
+      +'<div class="reason-lbl">⚠️ 4점 이상 선택 시 사유를 작성해주세요 (필수)</div>'
+      +'<textarea id="reason-txt" placeholder="해당 점수를 선택한 구체적인 근거를 작성해주세요...">'+(sv.reason||'')+'</textarea>'
+      +'</div></div>';
+  } else {
+    html+='<div class="qarea"><textarea id="txt-ans" placeholder="자유롭게 작성해주세요..." style="min-height:120px;">'+(sv.text||'')+'</textarea></div>';
+  }
+  html+='</div>';
+  document.getElementById('sv-q').innerHTML=html;
+}
+
+function setYN(isY){
+  if(!ANS[CS]) ANS[CS]={};
+  ANS[CS].yn=isY?'Y':'N';
+  var btns=document.querySelectorAll('.yn-btn');
+  btns[0].className='yn-btn '+(isY?'ay':'');
+  btns[1].className='yn-btn '+(isY?'':'an');
+  document.getElementById('chk-opts').style.display=isY?'block':'none';
+}
+
+function togChk(el){
+  var i=parseInt(el.getAttribute('data-i'));
+  if(!ANS[CS]) ANS[CS]={};
+  if(!ANS[CS].checked) ANS[CS].checked=[];
+  var arr=ANS[CS].checked;
+
+  if(el.checked){
+    if(i===0){
+      // ①없음 선택 → 나머지 모두 해제
+      arr.length=0;
+      arr.push(0);
+      document.querySelectorAll('.chk-item input[type=checkbox]').forEach(function(cb){
+        var ci=parseInt(cb.getAttribute('data-i'));
+        cb.checked=(ci===0);
+        cb.closest('.chk-item').classList.toggle('sel',ci===0);
+      });
+    } else {
+      // 다른 항목 선택 → ①없음 해제
+      var zeroIdx=arr.indexOf(0);
+      if(zeroIdx>=0) arr.splice(zeroIdx,1);
+      var zeroCb=document.querySelector('.chk-item input[data-i="0"]');
+      if(zeroCb){zeroCb.checked=false;zeroCb.closest('.chk-item').classList.remove('sel');}
+      if(arr.indexOf(i)<0) arr.push(i);
+      el.closest('.chk-item').classList.add('sel');
+    }
+  } else {
+    var j=arr.indexOf(i);
+    if(j>=0) arr.splice(j,1);
+    el.closest('.chk-item').classList.remove('sel');
+  }
+  document.getElementById('extra-wrap').style.display=arr.indexOf(5)>=0?'block':'none';
+}
+
+function setRate(n){
+  if(!ANS[CS]) ANS[CS]={};
+  ANS[CS].score=n;
+  var btns=document.querySelectorAll('.r-btn');
+  for(var i=0;i<btns.length;i++) btns[i].className='r-btn '+(i+1===n?'sel':'');
+  var qs=getQs(ETs[CEI].tp), q=qs[CS], dk=n<=2?1:n===3?3:5;
+  var rd=document.querySelector('.r-desc');
+  if(rd){rd.className='r-desc on';rd.textContent=q.d[dk]||'';}
+  var rb=document.getElementById('reason-box');
+  if(rb) rb.className='reason '+(n>=4?'on':'');
+}
+
+function collect(){
+  var q=getQs(ETs[CEI].tp)[CS];
+  if(!ANS[CS]) ANS[CS]={};
+  if(q.type==='ync'){
+    var e=document.getElementById('extra-txt');if(e)ANS[CS].extraText=e.value;
+    // ①없음이면 yn=N, 아니면 yn=Y (CSV 호환용)
+    if(ANS[CS].checked&&ANS[CS].checked.length>0){
+      ANS[CS].yn=ANS[CS].checked.indexOf(0)>=0?'N':'Y';
+    }
+  }
+  else if(q.type==='rate'){var r=document.getElementById('reason-txt');if(r)ANS[CS].reason=r.value;}
+  else{var t=document.getElementById('txt-ans');if(t)ANS[CS].text=t.value;}
+}
+
+function validate(){
+  collect();
+  var q=getQs(ETs[CEI].tp)[CS], a=ANS[CS]||{};
+  if(q.type==='ync'){
+    if(!a.checked||a.checked.length===0){alert('해당하는 항목을 하나 이상 선택해주세요.');return false;}
+    if(a.checked.indexOf(5)>=0&&!((a.extraText||'').trim())){alert('기타 내용을 입력해주세요.');return false;}
+  } else if(q.type==='rate'){
+    if(!a.score){alert('점수를 선택해주세요.');return false;}
+    if(a.score>=4&&!((a.reason||'').trim())){alert('4점 이상 선택 시 사유를 작성해주세요.');return false;}
+  } else {
+    if(!((a.text||'').trim())){alert('내용을 입력해주세요.');return false;}
+  }
+  return true;
+}
+
+function svNext(){
+  if(!validate()) return;
+  var qs=getQs(ETs[CEI].tp);
+  if(CS<qs.length-1){CS++;renderQ();}
+  else submit();
+}
+
+function svPrev(){
+  collect();
+  if(CS>0){CS--;renderQ();}
+  else{show('s-select');renderSelect();}
+}
+
+function submit(){
+  var item=ETs[CEI];
+  var record={ts:new Date().toISOString(),ei:CU.id,en:CU.name,et:CU.team,eg:CU.grade,ti:item.tgt.id,tn:item.tgt.name,tt:item.tgt.team,tg:item.tgt.grade,tp:item.tp,ans:JSON.parse(JSON.stringify(ANS)),type:item.tp};
+  addRes(record);
+  ETs[CEI].done=true;
+
+  // Google Sheets 전송
+  fetch('https://script.google.com/macros/s/AKfycbz-3mOkJ_pWVh5NZtif_JBkxiwDsVZVExp6mfEWFGUFhPH8a-HFPWs5v53aCYg1-ioD/exec', {
+    method:'POST',
+    mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(record)
+  }).catch(function(err){console.log('전송 오류:', err);});
+
+  goSelect();
+}
+
+/* ===== 관리자 ===== */
+function adminOut(){
+  show('s-login');
+  document.getElementById('admin-login').style.display='block';
+  document.getElementById('admin-main').style.display='none';
+  document.getElementById('adm-pw').value='';
+}
+
+function admLogin(){
+  var pw=document.getElementById('adm-pw').value.trim();
+  var err=document.getElementById('adm-err');
+  if(pw!==ADMIN_PW){err.style.display='block';return;}
+  err.style.display='none';
+  document.getElementById('admin-login').style.display='none';
+  document.getElementById('admin-main').style.display='block';
+  renderAdmStats();
+  renderAdmTable();
+  renderEmpTable();
+}
+
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){
+    b.className='tab-btn'+((['t-res','t-emp','t-q'][i])===id?' on':'');
+  });
+  document.querySelectorAll('.tab-c').forEach(function(c){c.className='tab-c';});
+  document.getElementById(id).className='tab-c on';
+  if(id==='t-q') showQType(curQType||3);
+}
+
+function renderAdmStats(){
+  var emps=getEmps();
+  var done=getDoneSet();
+  function getExp(emp){
+    var team=emps.filter(function(e){return e.team===emp.team&&e.id!==emp.id;});
+    if(emp.grade==='팀장') return team.length;
+    var hasMgr=emps.some(function(e){return e.team===emp.team&&e.grade==='팀장';});
+    return (hasMgr?1:0)+team.filter(function(e){return e.grade!=='팀장';}).length;
+  }
+  function getDone(emp){
+    var team=emps.filter(function(e){return e.team===emp.team&&e.id!==emp.id;});
+    if(emp.grade==='팀장') return team.filter(function(t){return done.has(emp.id+'_'+t.id+'_3');}).length;
+    var mgr=null;for(var i=0;i<emps.length;i++){if(emps[i].team===emp.team&&emps[i].grade==='팀장'){mgr=emps[i];break;}}
+    var t4=mgr&&done.has(emp.id+'_'+mgr.id+'_4')?1:0;
+    return t4+team.filter(function(e){return e.grade!=='팀장'&&done.has(emp.id+'_'+e.id+'_5');}).length;
+  }
+  var cD=0,cP=0,cN=0;
+  emps.forEach(function(emp){
+    var exp=getExp(emp); if(exp===0) return;
+    var d=getDone(emp);
+    if(d===exp) cD++; else if(d===0) cN++; else cP++;
+  });
+  document.getElementById('a-total').textContent=emps.length;
+  document.getElementById('a-done').textContent=cD;
+  document.getElementById('a-part').textContent=cP;
+  document.getElementById('a-none').textContent=cN;
+}
+
+function renderAdmTable(){
+  var all=getRes();
+  if(all.length===0){document.getElementById('adm-tbl').innerHTML='<p style="color:#aaa;text-align:center;padding:2rem;">응답 데이터가 없습니다.</p>';return;}
+  var byEval={};
+  all.forEach(function(r){
+    if(!byEval[r.ei]) byEval[r.ei]={id:r.ei,name:r.en,team:r.et,grade:r.eg,rows:[]};
+    byEval[r.ei].rows.push(r);
+  });
+  var sorted=Object.values(byEval).sort(function(a,b){return a.id-b.id;});
+  var BC={3:'b-pu',4:'b-am',5:'b-te'};
+  var TL={3:'Type3 팀장→팀원',4:'Type4 팀원→팀장',5:'Type5 동료평가'};
+
+  function fQ1(a){
+    var q=a[0]||{};
+    if(!q.checked||q.checked.length===0) return '-';
+    if(q.checked.indexOf(0)>=0) return '<span style="color:#059669;font-weight:500;">①없음</span>';
+    var items=VO.filter(function(_,i){return q.checked.indexOf(i)>=0;}).join(', ');
+    return '<span style="color:#dc2626;font-weight:500;">해당있음</span><br><small>'+items+(q.extraText?' / '+q.extraText:'')+'</small>';
+  }
+  function fQ(a,i){
+    var x=a[i];
+    if(!x) return '-';
+    if(x.score!==undefined){var s=''+x.score+'점';if(x.reason)s+='<br><small style="color:#888;">'+x.reason.slice(0,20)+(x.reason.length>20?'...':'')+'</small>';return s;}
+    if(x.text!==undefined) return '<small>'+x.text.slice(0,25)+(x.text.length>25?'...':'')+'</small>';
+    return '-';
+  }
+
+  var html='';
+  sorted.forEach(function(p){
+    var pid='p'+p.id;
+    var rows='';
+    p.rows.forEach(function(r){
+      var a=r.ans, dt=new Date(r.ts);
+      var ds=(dt.getMonth()+1)+'/'+dt.getDate()+' '+dt.getHours()+':'+('0'+dt.getMinutes()).slice(-2);
+      var rid='d'+r.ei+'_'+r.ti+'_'+r.tp;
+      rows+='<tr style="cursor:pointer;" onclick="togDetail(\''+rid+'\')">'
+        +'<td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;">'+r.tn+'<br><small style="color:#aaa;">'+r.tg+'</small></td>'
+        +'<td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;"><span class="badge '+BC[r.tp]+'" style="margin:0;font-size:11px;">'+TL[r.tp]+'</span></td>'
+        +'<td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#aaa;white-space:nowrap;">'+ds+'</td>'
+        +'<td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;color:#6366f1;font-size:12px;white-space:nowrap;">상세 ▾</td>'
+        +'</tr>'
+        +'<tr id="'+rid+'" style="display:none;background:#fafafa;">'
+        +'<td colspan="4" style="padding:12px 16px;border-bottom:1px solid #e8e8e8;">'
+        +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">'
+        +'<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:8px 10px;"><div style="font-size:11px;color:#888;margin-bottom:4px;">문1 (폭력)</div>'+fQ1(a)+'</div>'
+        +(a[1]?'<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:8px 10px;"><div style="font-size:11px;color:#888;margin-bottom:4px;">문2</div>'+fQ(a,1)+'</div>':'')
+        +(a[2]?'<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:8px 10px;"><div style="font-size:11px;color:#888;margin-bottom:4px;">문3</div>'+fQ(a,2)+'</div>':'')
+        +(a[3]?'<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:8px 10px;"><div style="font-size:11px;color:#888;margin-bottom:4px;">문4</div>'+fQ(a,3)+'</div>':'')
+        +(a[4]?'<div style="background:#fff;border:1px solid #e8e8e8;border-radius:8px;padding:8px 10px;"><div style="font-size:11px;color:#888;margin-bottom:4px;">문5</div>'+fQ(a,4)+'</div>':'')
+        +'</div></td></tr>';
+    });
+    html+='<div style="margin-bottom:10px;">'
+      +'<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#f5f3ff;border-radius:10px;border:1px solid #ddd6fe;cursor:pointer;" onclick="togPerson(\''+pid+'\')">'
+      +'<div class="avatar">'+p.name.slice(-2)+'</div>'
+      +'<div><span style="font-size:15px;font-weight:600;color:#222;">'+p.name+'</span><span style="font-size:12px;color:#666;margin-left:8px;">'+p.team+' · '+p.grade+'</span></div>'
+      +'<span style="margin-left:auto;font-size:13px;color:#6366f1;font-weight:500;">'+p.rows.length+'건 완료</span>'
+      +'<span id="arr_'+pid+'" style="font-size:12px;color:#aaa;margin-left:8px;">▾</span>'
+      +'</div>'
+      +'<div id="'+pid+'" style="display:none;border:1px solid #ddd6fe;border-top:none;border-radius:0 0 10px 10px;overflow-x:auto;">'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+      +'<thead><tr style="background:#fafafa;">'
+      +'<th style="padding:8px 12px;color:#555;font-weight:600;border-bottom:1px solid #e8e8e8;white-space:nowrap;text-align:left;">피평가자</th>'
+      +'<th style="padding:8px 12px;color:#555;font-weight:600;border-bottom:1px solid #e8e8e8;white-space:nowrap;text-align:left;">유형</th>'
+      +'<th style="padding:8px 12px;color:#555;font-weight:600;border-bottom:1px solid #e8e8e8;white-space:nowrap;text-align:left;">시간</th>'
+      +'<th style="padding:8px 12px;color:#555;font-weight:600;border-bottom:1px solid #e8e8e8;white-space:nowrap;text-align:left;"></th>'
+      +'</tr></thead>'
+      +'<tbody>'+rows+'</tbody></table></div></div>';
+  });
+  document.getElementById('adm-tbl').innerHTML=html;
+}
+
+function togPerson(id){
+  var el=document.getElementById(id);
+  if(!el) return;
+  var h=el.style.display==='none';
+  el.style.display=h?'block':'none';
+  var arr=document.getElementById('arr_'+id);
+  if(arr) arr.textContent=h?'▴':'▾';
+}
+function togDetail(id){
+  var el=document.getElementById(id);
+  if(!el) return;
+  var h=el.style.display==='none';
+  el.style.display=h?'table-row':'none';
+  var prev=el.previousElementSibling;
+  if(prev){var td=prev.querySelector('td:last-child');if(td)td.textContent=h?'닫기 ▴':'상세 ▾';}
+}
+
+function renderEmpTable(){
+  var emps=getEmps();
+  var html='';
+  emps.forEach(function(emp,i){
+    var tOpts=TEAMS.map(function(t){return '<option value="'+t+'"'+(emp.team===t?' selected':'')+'>'+t+'</option>';}).join('');
+    var gOpts=GRADES.map(function(g){return '<option value="'+g+'"'+(emp.grade===g?' selected':'')+'>'+g+'</option>';}).join('');
+    html+='<tr>'
+      +'<td style="color:#888;font-size:13px;">'+emp.id+'</td>'
+      +'<td><input type="text" value="'+emp.name+'" onchange="updEmp('+i+',\'name\',this.value)"/></td>'
+      +'<td><select onchange="updEmp('+i+',\'team\',this.value)">'+tOpts+'</select></td>'
+      +'<td><select onchange="updEmp('+i+',\'grade\',this.value)">'+gOpts+'</select></td>'
+      +'<td><input type="text" value="'+emp.pw+'" style="font-weight:600;color:#4f46e5;letter-spacing:1px;" onchange="updEmp('+i+',\'pw\',this.value.toUpperCase())" maxlength="6"/></td>'
+      +'</tr>';
+  });
+  document.getElementById('emp-body').innerHTML=html;
+}
+
+var pendEmp=null;
+function updEmp(i,f,v){if(!pendEmp)pendEmp=getEmps();pendEmp[i][f]=v;}
+function saveEmps(){
+  var d=pendEmp||getEmps();
+  d.forEach(function(e){e.pw=e.pw.toUpperCase();});
+  setEmps(d);pendEmp=null;
+  var ok=document.getElementById('save-ok');
+  ok.style.display='inline';
+  setTimeout(function(){ok.style.display='none';},2500);
+  renderEmpTable();
+}
+function resetEmps(){
+  if(!confirm('정말 원본 데이터로 초기화하시겠습니까?')) return;
+  localStorage.removeItem('emps');pendEmp=null;renderEmpTable();alert('초기화되었습니다.');
+}
+
+function doClear(){
+  if(!confirm('정말 모든 응답 데이터를 삭제하시겠습니까?')) return;
+  localStorage.removeItem('res');renderAdmStats();renderAdmTable();alert('삭제되었습니다.');
+}
+
+/* ===== 문항 수정 ===== */
+var curQType=3;
+var pendQ=null;
+
+function getQsData(){
+  try{var s=localStorage.getItem('custom_qs');return s?JSON.parse(s):null;}catch(e){return null;}
+}
+function setQsData(d){localStorage.setItem('custom_qs',JSON.stringify(d));}
+
+function getQAll(){
+  var saved=getQsData();
+  if(saved) return saved;
+  return {
+    3: JSON.parse(JSON.stringify(Q3)),
+    4: JSON.parse(JSON.stringify(Q4)),
+    5: JSON.parse(JSON.stringify(Q5))
+  };
+}
+
+function showQType(tp){
+  curQType=tp;
+  ['qt3','qt4','qt5'].forEach(function(id,i){
+    var btn=document.getElementById(id);
+    if(btn) btn.className='btn btn-s btn-sm'+(tp===[3,4,5][i]?' on-q':'');
+  });
+  var all=getQAll();
+  var qs=all[tp];
+  var html='';
+  qs.forEach(function(q,qi){
+    var typeLabel = q.type==='ync'?'Y/N+객관식':q.type==='rate'?'5점 척도':'주관식';
+    html += '<div class="card" style="margin-bottom:1rem;">';
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+    html += '<span style="font-size:13px;font-weight:600;color:#6366f1;">문항 '+(qi+1)+'</span>';
+    html += '<span style="font-size:12px;color:#888;">유형: '+typeLabel+'</span>';
+    html += '</div>';
+    html += '<div style="margin-bottom:8px;"><label style="font-size:12px;color:#555;margin-bottom:4px;">문항 내용</label>';
+    html += '<textarea id="qt_'+tp+'_'+qi+'" rows="3" style="font-size:13px;">'+q.text+'</textarea></div>';
+    if(q.type==='rate'){
+      html += '<div style="margin-top:8px;"><label style="font-size:12px;color:#555;margin-bottom:6px;">점수별 기준 설명</label>';
+      html += '<div style="display:flex;flex-direction:column;gap:6px;">';
+      html += '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-weight:600;color:#6366f1;width:30px;">1점</span><input type="text" id="qd_'+tp+'_'+qi+'_1" value="'+(q.d[1]||'')+'" style="font-size:12px;"/></div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-weight:600;color:#6366f1;width:30px;">3점</span><input type="text" id="qd_'+tp+'_'+qi+'_3" value="'+(q.d[3]||'')+'" style="font-size:12px;"/></div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:12px;font-weight:600;color:#6366f1;width:30px;">5점</span><input type="text" id="qd_'+tp+'_'+qi+'_5" value="'+(q.d[5]||'')+'" style="font-size:12px;"/></div>';
+      html += '</div></div>';
+    }
+    html += '</div>';
+  });
+  document.getElementById('q-edit-area').innerHTML=html;
+}
+
+
+
+
+function saveQs(){
+  var all=getQAll();
+  // 현재 화면의 입력값을 읽어서 저장
+  [3,4,5].forEach(function(tp){
+    var qs=all[tp];
+    qs.forEach(function(q,qi){
+      var ta=document.getElementById('qt_'+tp+'_'+qi);
+      if(ta) q.text=ta.value;
+      if(q.type==='rate'){
+        var d1=document.getElementById('qd_'+tp+'_'+qi+'_1');
+        var d3=document.getElementById('qd_'+tp+'_'+qi+'_3');
+        var d5=document.getElementById('qd_'+tp+'_'+qi+'_5');
+        if(d1) q.d[1]=d1.value;
+        if(d3) q.d[3]=d3.value;
+        if(d5) q.d[5]=d5.value;
+      }
+    });
+  });
+  setQsData(all);
+  Q3=JSON.parse(JSON.stringify(all[3]));
+  Q4=JSON.parse(JSON.stringify(all[4]));
+  Q5=JSON.parse(JSON.stringify(all[5]));
+  pendQ=null;
+  var ok=document.getElementById('q-save-ok');
+  ok.style.display='inline';setTimeout(function(){ok.style.display='none';},2500);
+}
+
+function resetQs(){
+  if(!confirm('정말 원본 문항으로 초기화하시겠습니까?')) return;
+  localStorage.removeItem('custom_qs');
+  pendQ=null;
+  Q3=JSON.parse(JSON.stringify(getDefaultQs(3)));
+  Q4=JSON.parse(JSON.stringify(getDefaultQs(4)));
+  Q5=JSON.parse(JSON.stringify(getDefaultQs(5)));
+  showQType(curQType);
+  alert('초기화되었습니다.');
+}
+
+function getDefaultQs(tp){
+  var q1={type:'ync',text:'구성원에게 차별, 모욕, 폭언, 성희롱 등의 신체적/정신적 고통을 주는 행위를 한다. 해당되는 사례에 모두 체크해주시기 바랍니다.'};
+  if(tp===3) return [q1,
+    {type:'rate',text:'구성원들이 갈등 없이 잘 융화하고 팀 분위기를 긍정적으로 만들고 적극적으로 소통하고 협업한다.',d:{1:'빈번한 갈등, 팀 분위기 저해, 협업에 소극적, 소통 부재',3:'협업 필요 시 참여, 업무 수동 원활, 팀 분위기에 융화',5:'긍정적 팀 분위기 주도, 적극적 소통, 협업 시 주도적 역할 수행, 팀/조직 성과에 기여'}},
+    {type:'rate',text:'주어진 업무의 중요도를 고려하여 우선순위를 선정하고 업무를 신속하게 처리한다.',d:{1:'업무기민 수준 미달, 우선순위/중요도 고려 미흡',3:'업무기민 준수, 우선순위/중요도 고려한 계획 수립',5:'업무기민 보다 빠르게 완수, 우선순위/중요도 고려'}},
+    {type:'rate',text:'업무 수행 시 합리적인 의사결정을 진행하고 해당 난이에 기대되는 Output을 제시한다.',d:{1:'결과기대 수준 미달',3:'요구하는 역할 대부분 수행, 결과물 결손 수준',5:'결과물 기대 수준 상회'}},
+    {type:'rate',text:'수행 업무에 대한 전문성과 업무 수행 절차에 대한 이해를 바탕으로 업무를 진행한다.',d:{1:'업무 관련 기본지식 부족',3:'업무 관련 기본지식 보유, 업무 수행 방법/절차 정확히 이해',5:'업무에 대한 논리적/합리적 접근, 업무 상황에 따라 방법/절차 고도화 및 응용 가능'}}
+  ];
+  if(tp===4) return [q1,
+    {type:'rate',text:'팀원이 편하게 의견을 제시할 수 있는 분위기를 조성하며, 업무와 관련된 구성원의 고충을 듣고 해결하려고 노력한다.',d:{1:'권위적, 무관심, 무조건적인 지시, 의견 무시',3:'편안한 분위기 조성, 팀원 의견에 대한 경청',5:'팀원 의견에 대한 지지/수용, 업무 고충 해결을 위한 노력, 신뢰감 제공'}},
+    {type:'text',text:'상시(팀장 혹은 본부장)의 업무 피드백 스타일을 설명해주세요.'}
+  ];
+  return [q1,
+    {type:'rate',text:'구성원들이 갈등 없이 잘 융화하고 팀 분위기를 긍정적으로 만들고 적극적으로 소통하고 협업한다.',d:{1:'빈번한 갈등, 팀 분위기 저해, 협업에 소극적, 소통 부재',3:'협업 필요 시 참여, 업무 수동 원활, 팀 분위기에 융화',5:'긍정적 팀 분위기 주도, 적극적 소통, 협업 시 주도적 역할 수행, 팀/조직 성과에 기여'}}
+  ];
+}
+
+
+// 페이지 로드 시 저장된 문항 불러오기
+(function(){
+  var saved=getQsData();
+  if(saved){
+    if(saved[3]) Q3=saved[3];
+    if(saved[4]) Q4=saved[4];
+    if(saved[5]) Q5=saved[5];
+  }
+})();
+
+function doExport(){
+  var all=getRes();
+  if(all.length===0){alert('다운로드할 데이터가 없습니다.');return;}
+  var TL={3:'Type3(팀장→팀원)',4:'Type4(팀원→팀장)',5:'Type5(동료평가)'};
+  var headers=['제출시간','평가유형','평가자ID','평가자이름','평가자팀','평가자직급','피평가자ID','피평가자이름','피평가자팀','피평가자직급','문1_YN','문2_점수','문2_사유/내용','문3_점수','문3_사유/내용','문4_점수','문4_사유','문5_점수','문5_사유'];
+  var rows=[headers];
+  all.forEach(function(r){
+    var a=r.ans;
+    var q1=a[0]||{};
+    function qv(i){var x=a[i];if(!x)return['',''];if(x.score!==undefined)return[x.score,x.reason||''];if(x.text!==undefined)return['',x.text];return['',''];}
+    var q2=qv(1),q3=qv(2),q4=qv(3),q5=qv(4);
+    rows.push([new Date(r.ts).toLocaleString('ko-KR'),TL[r.tp]||r.tp,r.ei,r.en,r.et,r.eg,r.ti,r.tn,r.tt,r.tg,q1.yn||'',q2[0],q2[1],q3[0],q3[1],q4[0],q4[1],q5[0],q5[1]]);
+  });
+  var csv='\uFEFF'+rows.map(function(row){return row.map(function(c){var s=String(c).replace(/"/g,'""');return /[,"\n\r]/.test(s)?'"'+s+'"':s;}).join(',');}).join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download='팀평가결과_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
